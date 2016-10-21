@@ -1,0 +1,32 @@
+update fil_project_head t set t.lease_code = 'EGIC-HZL-FXFY05120726' where t.lease_code = 'EGIC-HZ-FXFY662016230';--项目表
+update fil_rent_plan_change t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--支付表变更
+update fil_rent_plan_head t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--支付表表头
+update fil_buy_contract t set t.lease_code = 'EGIC-HZL-FXFY05120726' where t.lease_code = 'EGIC-HZ-FXFY662016230';--买卖合同表
+update fi_r_beginning t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--应收表
+update fi_r_beginning_join t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--应收表
+update fil_project_equipment t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--设备表
+update fi_fund_payment_detail t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--放款表
+update FIL_PROJECT_DAY_PUACCRATE t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1' where t.paylist_code = 'EGIC-HZ-FXFY662016230-1' ;--
+
+
+
+只改编号不该id
+支付表
+fil_rent_plan_change
+fil_rent_plan_detail
+fil_rent_plan_head
+fil_rent_plan_detail_scheme
+fil_rent_plan_detail_lh
+fil_rent_plan_head_hg
+买卖合同
+fil_buy_contract
+应收表
+fi_r_beginning
+fi_r_beginning_join
+fi_r_beginning_hg_lixi
+罚息表
+fi_overdue
+资金表
+fi_fund
+设备
+fil_project_equipment
