@@ -1,0 +1,33 @@
+select bj.Beginning_Receive_Data,
+       bj.beginning_name,
+       bj.beginning_money,
+       lx.beginning_name,
+       lx.beginning_money,
+       zzs.beginning_name,
+       zzs.beginning_money
+  from (SELECT to_char(T.Beginning_Receive_Data, 'yyyy-mm') Beginning_Receive_Data,
+               max(t.beginning_name) beginning_name，sum(t.beginning_money) beginning_money
+          FROM fi_r_beginning t
+         WHERE t.beginning_name in ('本金')
+           AND T.BEGINNING_MONEY != 0
+           and t.beginning_receive_data >
+               to_date('2016-08-31', 'yyyy-mm-dd')
+         group by to_char(T.Beginning_Receive_Data, 'yyyy-mm')) bj,
+       (SELECT to_char(T.Beginning_Receive_Data, 'yyyy-mm') Beginning_Receive_Data,
+               max(t.beginning_name) beginning_name，sum(t.beginning_money) beginning_money
+          FROM fi_r_beginning t
+         WHERE t.beginning_name in ('利息')
+           AND T.BEGINNING_MONEY != 0
+           and t.beginning_receive_data >
+               to_date('2016-08-31', 'yyyy-mm-dd')
+         group by to_char(T.Beginning_Receive_Data, 'yyyy-mm')) lx,
+       (SELECT to_char(T.Beginning_Receive_Data, 'yyyy-mm') Beginning_Receive_Data,
+               max(t.beginning_name) beginning_name，sum(t.beginning_money) beginning_money
+          FROM fi_r_beginning t
+         WHERE t.beginning_name in ('利息增值税')
+           AND T.BEGINNING_MONEY != 0
+           and t.beginning_receive_data >
+               to_date('2016-08-31', 'yyyy-mm-dd')
+         group by to_char(T.Beginning_Receive_Data, 'yyyy-mm')) zzs
+ WHERE bj.beginning_receive_data = lx.beginning_receive_data
+   and lx.beginning_receive_data = zzs.beginning_receive_data(+)
