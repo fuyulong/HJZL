@@ -1,0 +1,199 @@
+SELECT decode(su.name, null, su1.name, su.name) 发起人名称,
+       decode(su.dept_name, null, su1.dept_name, su.dept_name) 所在部门,
+       TO_CHAR(DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') 发起时间,
+       EXECUTIONID 流程编号,
+       ACTIVITYNAME 流程节点名称,
+       ASSIGNEE_ 任务人编号,
+       TASKNAME 任务人名称,
+       TO_CHAR(CREATETIME, 'YYYY-MM-DD HH24:MI') 任务生成时间,
+       trunc(sysdate) - trunc(CREATETIME) || '天' 任务耗时,
+       PRO_NAME 项目名称,
+       PRO_CODE 项目编号,
+       CUST_NAME 客户名称,
+       PAY_CODE 支付表编号,
+       TO_CHAR(LEASE_TOPRIC, '999,999,999,999.00') 融资额
+  FROM (SELECT T.DBID_             ID,
+               T.STATE_            STATE,
+               T.CREATE_           CREATETIME,
+               T.ASSIGNEE_,
+               T.TASKNAME,
+               T.EXECUTION_ID_     EXECUTIONID,
+               T.ACTIVITY_NAME_    ACTIVITYNAME,
+               T.PRO_NAME,
+               T.PRO_CODE,
+               T.SUNAME,
+               T.SUMOBILE,
+               T.LEASE_TOPRIC,
+               T.DISTRIBUTION_DATE,
+               T.AMOUNT,
+               T.CUST_NAME,
+               T.PAY_CODE,
+               T.DAYNUM,
+               T.LAST_NODE,
+               NULL                MEMO_ID,
+               T.CSSJ,
+               T.OP_CODE
+          FROM (SELECT T1.*, JDC.ENTRUST_FLAG, JDC.CSSJ
+                  FROM (SELECT JT.DBID_,
+                               JT.STATE_,
+                               JT.CREATE_,
+                               JT.ASSIGNEE_,
+                               SU1.NAME TASKNAME,
+                               JT.EXECUTION_ID_,
+                               JT.ACTIVITY_NAME_,
+                               FPH.PRO_NAME,
+                               FPH.PRO_CODE,
+                               SU.NAME SUNAME,
+                               SU.MOBILE SUMOBILE,
+                               TSC.DISTRIBUTION_DATE,
+                               FPH.LEASE_TOPRIC,
+                               FPH.AMOUNT,
+                               FCC.NAME CUST_NAME,
+                               P.PAY_CODE,
+                               JT.LAST_NODE,
+                               P.PROCDEFID_,
+                               P.OP_CODE,
+                               NVL(VDT.DAYNUM, 0) AS DAYNUM
+                          FROM JBPM4_TASK JT,
+                               JBPM4_HIST_PROCINST P,
+                               FIL_CUST_CLIENT FCC,
+                               FIL_PROJECT_HEAD FPH,
+                               SECU_USER SU,
+                               SECU_USER SU1,
+                               (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE,
+                                       NAME
+                                  FROM T_SYS_TASK_CLAIM
+                                 GROUP BY NAME) TSC,
+                               VI_DAYNUM_TONOW VDT
+                         WHERE JT.PROCINST_ = P.DBID_(+)
+                           AND P.CUST_ID = FCC.ID(+)
+                           AND P.PROJECT_ID = FPH.ID(+)
+                           AND FPH.CLERK_ID = SU.ID(+)
+                           AND JT.ASSIGNEE_ = SU1.CODE(+)
+                           AND P.ID_ = TSC.NAME(+)
+                           AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+                           AND JT.ASSIGNEE_ IN
+                               (SELECT JE2.SRC_CODE
+                                  FROM JBPM_ENTRUST JE2
+                                 WHERE --JE2.NEW_CODE = '10008'
+                                -- AND 
+                                 JE2.STATUS = 'normal')) T1,
+                       JBPM_DEPLOY_CONFIG JDC
+                 WHERE T1.PROCDEFID_ = JDC.PDID(+)
+                   AND T1.ACTIVITY_NAME_ = JDC.NAME(+)) T
+         WHERE ENTRUST_FLAG IS NULL
+            OR ENTRUST_FLAG != 'nnnn'
+        UNION ALL
+        SELECT JT.DBID_ ID,
+               JT.STATE_ STATE,
+               JT.CREATE_ CREATETIME,
+               JT.ASSIGNEE_,
+               SU1.NAME TASKNAME,
+               JT.EXECUTION_ID_ EXECUTIONID,
+               JT.ACTIVITY_NAME_ ACTIVITYNAME,
+               FPH.PRO_NAME,
+               FPH.PRO_CODE,
+               SU.NAME SUNAME,
+               SU.MOBILE SUMOBILE,
+               FPH.LEASE_TOPRIC,
+               TO_DATE(TO_CHAR(JT.CREATE_, 'YYYY-MM-DD HH24:MI'),
+                       'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+               FPH.AMOUNT,
+               FCC.NAME CUST_NAME,
+               P.PAY_CODE,
+               NVL(VDT.DAYNUM, 0) AS DAYNUM,
+               JT.LAST_NODE,
+               NULL LOOK,
+               JDC.CSSJ,
+               P.OP_CODE
+          FROM JBPM4_TASK          JT,
+               T_SYS_TASK_GROUP    TSTG,
+               FIL_PROJECT_HEAD    FPH,
+               JBPM4_HIST_PROCINST P,
+               SECU_USER           SU,
+               SECU_USER           SU1,
+               FIL_CUST_CLIENT     FCC,
+               VI_DAYNUM_TONOW     VDT,
+               JBPM_DEPLOY_CONFIG  JDC
+         WHERE JT.NAME_ = TSTG.TASK_NAME
+           AND JT.PROCINST_ = P.DBID_(+)
+           AND P.CUST_ID = FCC.ID(+)
+           AND P.PROJECT_ID = FPH.ID(+)
+           AND FPH.CLERK_ID = SU.ID(+)
+           AND JT.ASSIGNEE_ = SU1.CODE(+)
+           AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+              --AND TSTG.CREATION_MAN = '13048'
+           AND P.PROCDEFID_ = JDC.PDID
+           AND JT.ACTIVITY_NAME_ = JDC.NAME
+        UNION ALL
+        SELECT *
+          FROM (SELECT JT.DBID_ ID,
+                       JT.STATE_ STATE,
+                       JT.CREATE_ CREATETIME,
+                       JT.ASSIGNEE_,
+                       SU1.NAME TASKNAME,
+                       JT.EXECUTION_ID_ EXECUTIONID,
+                       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+                       FPH.PRO_NAME,
+                       FPH.PRO_CODE,
+                       SU.NAME SUNAME,
+                       SU.MOBILE SUMOBILE,
+                       FPH.LEASE_TOPRIC,
+                       TSC.DISTRIBUTION_DATE,
+                       FPH.AMOUNT,
+                       FCC.NAME CUST_NAME,
+                       P.PAY_CODE,
+                       NVL(VDT.DAYNUM, 0) AS DAYNUM,
+                       JT.LAST_NODE,
+                       CASE
+                         WHEN JEE.SRC_CODE IS NOT NULL AND
+                              (JDC.ENTRUST_FLAG IS NULL OR
+                              JDC.ENTRUST_FLAG != 'nnnn') THEN
+                          1
+                         ELSE
+                          NULL
+                       END LOOK,
+                       JDC.CSSJ,
+                       P.OP_CODE
+                  FROM JBPM4_TASK JT,
+                       JBPM4_HIST_PROCINST P,
+                       FIL_CUST_CLIENT FCC,
+                       FIL_PROJECT_HEAD FPH,
+                       SECU_USER SU,
+                       SECU_USER SU1,
+                       (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE, NAME
+                          FROM T_SYS_TASK_CLAIM
+                         GROUP BY NAME) TSC,
+                       VI_DAYNUM_TONOW VDT,
+                       JBPM_DEPLOY_CONFIG JDC,
+                       JBPM_MEMO JM,
+                       (SELECT JE2.SRC_CODE
+                          FROM JBPM_ENTRUST JE2
+                         WHERE --JE2.SRC_CODE = '10008'
+                        --AND 
+                         JE2.STATUS = 'normal') JEE
+                 WHERE JT.PROCINST_ = P.DBID_(+)
+                   AND P.PROCDEFID_ = JDC.PDID
+                   AND JT.ACTIVITY_NAME_ = JDC.NAME
+                   AND P.CUST_ID = FCC.ID(+)
+                   AND P.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLERK_ID = SU.ID(+)
+                   AND JT.ASSIGNEE_ = SU1.CODE(+)
+                   AND P.ID_ = TSC.NAME(+)
+                   AND JT.DBID_ = JM.TASK_ID(+)
+                      -- AND (JT.ASSIGNEE_ = '10008' OR JM.OP_CODE = '10008')
+                   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+                   AND FPH.PRO_CODE = VDT.PRO_CODE(+))
+         WHERE LOOK IS NULL) T,
+       OA_INTERNAL_APPLY oia,
+       (SELECT je.id_, jv.STRING_VALUE_
+          FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+         WHERE JE.DBID_ = JV.EXECUTION_
+           AND JV.KEY_ = 'CREATEUSERCODE') fqr,
+       secu_user su,
+       secu_user su1
+ where t.executionid = oia.jbpm_id(+)
+   and t.executionid = fqr.id_(+)
+   and fqr.string_value_ = su.code(+)
+   and OP_CODE = su1.code(+)
+ ORDER BY CREATETIME,TASKNAME DESC
