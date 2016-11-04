@@ -1,3 +1,4 @@
+select * from (
 SELECT decode(su.name, null, su1.name, su.name) 发起人名称,
        decode(su.dept_name, null, su1.dept_name, su.dept_name) 所在部门,
        TO_CHAR(DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') 发起时间,
@@ -196,4 +197,8 @@ SELECT decode(su.name, null, su1.name, su.name) 发起人名称,
    and t.executionid = fqr.id_(+)
    and fqr.string_value_ = su.code(+)
    and OP_CODE = su1.code(+)
- ORDER BY CREATETIME,TASKNAME DESC
+ ORDER BY CREATETIME,TASKNAME DESC) 
+ WHERE 流程编号 not like '%出差申请流程%'
+ and 流程编号 not like '%内部请示单审批流程%'
+ and 流程编号 not like '%用章申请流程%'
+ 
