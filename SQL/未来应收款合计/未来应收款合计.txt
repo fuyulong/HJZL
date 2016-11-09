@@ -1,0 +1,9 @@
+select fph.pro_name, frb.beginning_money
+  from fil_project_head fph,
+       (SELECT t.paylist_code, sum(t.beginning_money) beginning_money
+          FROM fi_r_beginning t
+         WHERE t.beginning_receive_data > sysdate
+         group by t.paylist_code) frb,
+       fil_rent_plan_head_bas_max__v frph
+ WHERE fph.id = frph.PROJECT_ID
+   and frph.paylist_code = frb.paylist_code
