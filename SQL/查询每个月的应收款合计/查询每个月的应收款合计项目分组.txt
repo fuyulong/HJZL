@@ -1,0 +1,27 @@
+select FPH.PRO_NAME,
+       to_char(t.PAY_DATE, 'yyyy-mm'),
+       SUM(本金),
+       SUM(利息),
+       SUM(利息增值税),
+       SUM(手续费)
+  from (select d.pay_id, --租V_FIL_RENT_PLAN_DETAIL_RTC金计划id
+               H.PAYLIST_CODE 还款表编号, --租金计划编号
+               h.PROJECT_ID,
+               D.PAY_DATE, --租金计划约定日期
+               max(decode(d.item_name, '本金', d.item_money)) 本金, --本金
+               max(decode(d.item_name, '利息', d.item_money)) 利息, --利息
+               max(decode(d.item_name, '利息增值税', d.item_money)) 利息增值税, --利息增值税
+               max(decode(d.item_name, '手续费', d.item_money)) 手续费, --手续费
+               max(decode(d.item_name, '管理费', d.item_money)) 管理费 --管理费
+          from fil_rent_plan_detail d, fil_rent_plan_head_max_v h
+         where d.pay_id = h.id
+           and d.item_flag = 2
+         group by d.pay_id,
+                  H.PAYLIST_CODE,
+                  D.PERIOD_NUM,
+                  D.PAY_DATE， h.PROJECT_ID) t,
+       FIL_PROJECT_HEAD FPH
+ WHERE T.PROJECT_ID = FPH.ID
+   and t.PAY_DATE > to_date('2016-08-31', 'yyyy-mm-dd')
+   and t.PAY_DATE < to_date('2018-03-1', 'yyyy-mm-dd')
+ group by to_char(t.PAY_DATE, 'yyyy-mm'), T.PROJECT_ID, FPH.PRO_NAME

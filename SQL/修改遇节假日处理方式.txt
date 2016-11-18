@@ -1,0 +1,9 @@
+--支付表页面的
+select t.*, t.rowid
+  from RE_REFINANCE_PAYMENT_DETAIL T
+ WHERE PAY_ID = '1135'
+ ORDER BY T.PERIOD_NUM;
+--项目方案查看页面的
+select t.*,t.rowid from fil_scheme_clob t where t.id = '34202';
+select t.*,t.rowid from  FIL_PROJECT_SCHEME t
+	 WHERE  t.ID='7970662'

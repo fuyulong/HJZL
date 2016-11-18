@@ -1,0 +1,20 @@
+ SELECT fph.pro_name, tsddxm.flag,fph.clerk_name, tog.rz_status, tog.id
+     FROM fil_project_head fph,
+          t_gls tg,
+          (select TSDD.FLAG RZ_STATUS, T.gls_id, t.id
+             from T_ORGAN_GLS t,
+                  RE_REFINANCE_BAILOUTWAY rrb,
+                  RE_REFINANCE_PROJECT RRP,
+                  (select code, flag
+                     from T_SYS_DATA_DICTIONARY t
+                    WHERE t.TYPE = '融资项目状态') TSDD
+            WHERE T.ORGAN_ID = RRB.ID
+              AND RRP.BAILOUTWAY_ID = RRB.ID
+              and TSDD.CODE(+) = RRP.PROJECT_STATUS) tog,
+          (select code, flag
+             from t_Sys_Site_Dictionary T
+            WHERE t.TYPE = '项目状态位') tsddxm
+    WHERE fph.id = tg.project_id
+      and tg.id = tog.gls_id(+)
+      and fph.status = tsddxm.code
+      and tsddxm.code != 0
