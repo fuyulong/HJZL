@@ -1,0 +1,48 @@
+SELECT TSQL
+  FROM (SELECT CASE
+                 WHEN C.COLUMN_ID = 1 THEN
+                  'INSERT INTO ' || T.TABLE_NAME || '( <if test="' ||
+                  C.COLUMN_NAME || ' != null"> ' || C.COLUMN_NAME || ' </if>'
+                 WHEN C.COLUMN_ID = CC.CNT THEN
+                  '<if test="' || C.COLUMN_NAME || ' != null"> ,' ||
+                  C.COLUMN_NAME || ' </if>' || ')VALUES('
+                 ELSE
+                  '<if test="' || C.COLUMN_NAME || ' != null"> ,' ||
+                  C.COLUMN_NAME || ' </if>'
+               END TSQL,
+               T.TABLE_NAME,
+               C.COLUMN_NAME,
+               1 O,
+               COLUMN_ID
+          FROM USER_TABLES T,
+               USER_TAB_COLUMNS C,
+               (SELECT TABLE_NAME, COUNT(1) CNT
+                  FROM USER_TAB_COLUMNS C
+                 GROUP BY C.TABLE_NAME) CC
+         WHERE T.TABLE_NAME = C.TABLE_NAME
+           AND T.TABLE_NAME = CC.TABLE_NAME
+        UNION ALL
+        SELECT CASE
+                 WHEN C.COLUMN_ID = 1 THEN
+                  '<if test="' || C.COLUMN_NAME || ' != null"> #{' ||
+                  C.COLUMN_NAME || '} </if>'
+                 WHEN C.COLUMN_ID = CC.CNT THEN
+                  '<if test="' || C.COLUMN_NAME || ' != null"> ,#{' ||
+                  C.COLUMN_NAME || '} </if>)'
+                 ELSE
+                  '<if test="' || C.COLUMN_NAME || ' != null"> ,#{' ||
+                  C.COLUMN_NAME || '} </if>'
+               END TSQL,
+               T.TABLE_NAME,
+               C.COLUMN_NAME,
+               2 O,
+               COLUMN_ID
+          FROM USER_TABLES T,
+               USER_TAB_COLUMNS C,
+               (SELECT TABLE_NAME, COUNT(1) CNT
+                  FROM USER_TAB_COLUMNS C
+                 GROUP BY C.TABLE_NAME) CC
+         WHERE T.TABLE_NAME = C.TABLE_NAME
+           AND T.TABLE_NAME = CC.TABLE_NAME
+         ORDER BY TABLE_NAME, O, COLUMN_ID)
+ WHERE TABLE_NAME = 'T_RETAIL_ANALYSIS'
