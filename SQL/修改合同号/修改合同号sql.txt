@@ -10,23 +10,30 @@ update FIL_PROJECT_DAY_PUACCRATE t set t.paylist_code = 'EGIC-HZL-FXFY05120726-1
 
 
 
-只改编号不该id
-支付表
-fil_rent_plan_change
-fil_rent_plan_detail
-fil_rent_plan_head
-fil_rent_plan_detail_scheme
-fil_rent_plan_detail_lh
-fil_rent_plan_head_hg
-买卖合同
-fil_buy_contract
-应收表
-fi_r_beginning
-fi_r_beginning_join
-fi_r_beginning_hg_lixi
-罚息表
-fi_overdue
-资金表
-fi_fund
-设备
-fil_project_equipment
+--只改编号不该id
+--支付表
+SELECT T.*,T.ROWID FROM  fil_rent_plan_change t WHERE t.paylist_code = 'EGIC-HZ-LAJT362016242-ZJ-01';
+SELECT T.*,T.ROWID FROM fil_rent_plan_detail t WHERE t.pay_id = 438201;
+SELECT T.*,T.ROWID FROM fil_rent_plan_head t WHERE t.paylist_code = 'EGIC-HZ-LAJT362016242-ZJ-01';
+SELECT T.*,T.ROWID FROM fil_rent_plan_detail_scheme t WHERE T.PAY_ID = 438201;
+SELECT T.*,T.ROWID FROM fil_rent_plan_detail_lh t WHERE t.pay_id = 438201;
+SELECT T.*,T.ROWID FROM fil_rent_plan_head_hg t WHERE t.pay_id = 438201;
+--买卖合同
+SELECT T.*,T.ROWID FROM fil_buy_contract t WHERE t.paylist_code = 'EGIC-HZ-LAJT362016242-ZJ-01';
+--应收表
+UPDATE  fi_r_beginning t SET T.PAYLIST_CODE = 'EGIC-HZL-LAJT05160429-ZJ' WHERE T.PAYLIST_CODE = 'EGIC-HZ-LAJT362016242-ZJ-01';
+UPDATE   fi_r_beginning_join t  SET T.Paylist_Code = 'EGIC-HZL-LAJT05160429-ZJ',t.pro_code ='EGIC-HZL-LAJT05160429-ZJ'  WHERE T.PAYLIST_CODE = 'EGIC-HZ-LAJT362016242-ZJ-01';
+SELECT T.*,T.ROWID FROM fi_r_beginning_hg_lixi t WHERE t.paylist_code = 'EGIC-HZ-LAJT362016242-ZJ-01';
+--罚息表
+SELECT T.*,T.ROWID FROM fi_overdue t WHERE T.PAY_CODE = 'EGIC-HZ-LAJT362016242-ZJ-01';
+--资金表
+SELECT T.*,T.ROWID FROM fi_fund t WHERE T.FUND_PAY_CODE = 'EGIC-HZ-LAJT362016242-ZJ-01';
+--设备
+SELECT T.*,T.ROWID FROM fil_project_equipment t WHERE T.PAYLIST_CODE = 'EGIC-HZ-LAJT362016242-ZJ-01';
+--项目表
+SELECT T.*,T.ROWID FROM fil_project_head  t WHERE T.LEASE_CODE = 'EGIC-HZ-LAJT362016242';
+--买卖合同
+SELECT T.*,T.ROWID FROM fil_buy_contract t WHERE T.LEASE_CODE = 'EGIC-HZ-LAJT362016242';
+--付款
+SELECT T.*,T.ROWID FROM fi_fund_payment_detail t WHERE t.paylist_code = 'EGIC-HZ-LAJT362016242';
+SELECT T.*,T.ROWID FROM FIL_PROJECT_DAY_PUACCRATE t WHERE T.PAYLIST_CODE = 'EGIC-HZ-LAJT362016242';
